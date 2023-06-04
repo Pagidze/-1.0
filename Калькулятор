@@ -1,0 +1,294 @@
+import tkinter as tk
+
+#Задаём окно
+root = tk.Tk()
+root.title("Калькулятор")
+root.geometry('480x550')
+
+#Начальное value
+if 'check' not in globals():
+    value = ''
+    check = 1
+
+check_2 = 0 #Проверка, чтобы стирать код после равно
+
+dod = [0, 0, 0, 0, 0, 0, 0] #Массив, с кол-вом мат.знаков
+
+check_3 = 1 #доп.кнопки
+
+#деление
+def delenie(ans):
+    ans_1 = ans.index('/')
+    ans_2 = float(ans[ans_1 - 1]) / float(ans[ans_1 + 1])
+    del ans[ans_1 - 1:ans_1 + 2]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+#умножение
+def umnoz(ans):
+    ans_1 = ans.index('*')
+    ans_2 = float(ans[ans_1 - 1]) * float(ans[ans_1 + 1])
+    del ans[ans_1 - 1:ans_1 + 2]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+#Сложение
+def plus(ans):
+    ans_1 = ans.index('+')
+    ans_2 = float(ans[ans_1 - 1]) + float(ans[ans_1 + 1])
+    del ans[ans_1 - 1:ans_1 + 2]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+#Вычитание
+def minus(ans):
+    ans_1 = ans.index('-')
+    ans_2 = float(ans[ans_1 - 1]) - float(ans[ans_1 + 1])
+    del ans[ans_1 - 1:ans_1 + 2]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+#Возведение в степень
+def stepen(ans):
+    ans_1 = ans.index('^')
+    ans_2 = float(ans[ans_1 - 1]) ** float(ans[ans_1 + 1])
+    del ans[ans_1 - 1:ans_1 + 2]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+def proc(ans):
+    ans_1 = ans.index('%')
+    ans_2 = float(ans[ans_1 - 3]) / 100 * float(ans[ans_1 - 1])
+    del ans[ans_1 - 1:ans_1]
+    ans.insert(ans_1 - 1, ans_2)
+    return ans
+
+#Считает ответ в нужном порядке
+def anss(ant):
+    global value, dod
+    print(ant, 'ant')
+    if dod[5] != 0: #Если есть возведение в степень
+        for i in range(dod[5]):
+            ant = stepen(ant)
+    if dod[6] != 0: #Если есть проценты
+        for i in range(dod[6]):
+            ant = proc(ant)
+    if (dod[2] or dod[3]) != 0: #Если есть умножение или деление
+        if (dod[2] and dod[3]) != 0: #Если есть умножение и деление
+            for i in range(dod[2] + dod[3]):
+                if '*' not in ant:
+                    ant = delenie(ant)
+                elif '/' not in ant:
+                    ant = umnoz(ant)
+                elif (ant.index('/') < ant.index('*')):
+                    ant = delenie(ant)
+                else:
+                    ant = umnoz(ant)
+        if dod[2] == 0: #Если только теление
+            for i in range(dod[3]):
+                ant = delenie(ant)
+        elif dod[3] == 0: #Если только умножение
+            for i in range(dod[2]):
+                ant = umnoz(ant)
+    if (dod[0] or dod[1]) != 0: #Если есть сложение и вычитание
+        if (dod[0] and dod[1]) != 0:
+            for i in range(dod[0] + dod[1]):
+                if '+' not in ant:
+                    ant = minus(ant)
+                elif '-' not in ant:
+                    ant = plus(ant)
+                elif (ant.index('+') < ant.index('-')):
+                    ant = plus(ant)
+                else:
+                    ant = minus(ant)
+        if dod[0] == 0: #Если только вычитание
+            for i in range(dod[1]):
+                ant = minus(ant)
+        elif dod[1] == 0: #Если только сложение
+            for i in range(dod[0]):
+                ant = plus(ant)
+    return ant
+
+#Заносит всё в массив
+def ravno():
+    global value, check_2, dod
+    ans = []
+    for i in value:
+        if i == '+':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i)+1:]
+        if i == '-':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == '*':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == '/':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == '(':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == ')':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == '^':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+        if i == '%':
+            ans.append(value[0:value.find(i)])
+            ans.append(i)
+            value = value[value.find(i) + 1:]
+
+        dod[4] = ans.count('(') #Считает кол-во скобок
+    ans.append(value[0:])
+
+    while ans.count('') != 0:
+        ans.remove('')
+
+    if dod[4] != 0: #Если есть скобки
+        for i in range(dod[4]):
+            k = ans.index('(') #индекс скобки
+            ans_copyy = ans[ans.index('(') + 1:ans.index(')')] #Копирует массив внутри скобки
+            dod[0] = ans_copyy.count('+') #cчитает кол-во плюсов в скобке
+            dod[1] = ans_copyy.count('-') #cчитает кол-во минусов в скобке
+            dod[2] = ans_copyy.count('*') #cчитает кол-во умножения в скобке
+            dod[3] = ans_copyy.count('/') #cчитает кол-во деление в скобке
+            dod[5] = ans_copyy.count('^') #cчитает кол-во возведения в степень в скобке
+            dod[6] = ans_copyy.count('%')
+            ans_copy = anss(ans_copyy)
+            del ans[ans.index('('):ans.index(')') + 1] #Удаляет скобку
+            ans.insert(k, str(ans_copy[0])) #Вставляет вместо скобки число
+    dod[0] = ans.count('+') #cчитает кол-во плюсов
+    dod[1] = ans.count('-') #cчитает кол-во минусов
+    dod[2] = ans.count('*') #cчитает кол-во умножения
+    dod[3] = ans.count('/') #cчитает кол-во деление
+    dod[5] = ans.count('^') #cчитает кол-во возведения в степень
+    dod[6] = ans.count('%')
+    value = anss(ans)
+    value = str(value[0])
+    if value[-1] == '0': #Убирает лишние знаки после зпт
+        value = value[0:-2]
+    text.config(text=value) #вывод ответа на экран
+    check_2 = 1 #Показывает что нажали =
+
+def Chisla(self): #ввод чисел
+    global value, check_2
+    if check_2 == 1: #Если на число нажали после ровно, то он удаляет ответ с экрана
+        value = ''
+        check_2 = 0
+    value += self
+    text.config(text=value)
+
+def do(self): #Ввод мат.знаков
+    global value, check_2
+    if check_2 == 1:
+        check_2 = 0
+    value += self
+    text.config(text=value)
+def dele(): #delete
+    global value, ans
+    value = value[0:-1]
+    text.config(text=value)
+
+def c(): #Очистка
+    global value, ans
+    value = ''
+    text.config(text=value)
+
+def square(): #возведение в квадрат
+    global value
+    square = int(value)
+    square = square ** 2
+    text.config(text=square)
+    value=''
+
+def cor(): #корень
+    global value
+    square = int(value)
+    square = square ** 0.5
+    text.config(text=square)
+    value = ''
+
+def dob(): #доп.кнопки
+    global check_3
+    if check_3 == 1:
+        btn_sc_1.grid(row=2, column=4, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+        btn_sc_2.grid(row=3, column=4, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+        btn_step.grid(row=4, column=4, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+        btn_kor.grid(row=5, column=4, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+        check_3=0
+    else:
+        btn_sc_2.grid_forget()
+        btn_sc_1.grid_forget()
+        btn_step.grid_forget()
+        btn_kor.grid_forget()
+        check_3 = 1
+
+
+#кнопки
+#Задаёт значение кнопкам
+for i in range(4): root.columnconfigure(index=i, weight=1)
+for i in range(6): root.rowconfigure(index=i, weight=1)
+
+#Задаёт экран
+text = tk.Label(text='0', font=40, bg='black', fg='white', justify='right')
+text.grid(row=0, column=0, columnspan=4, ipadx=480, ipady=50)
+
+btn_1 = tk.Button(text='1', font=10, command=lambda:Chisla('1')) #  |
+btn_2 = tk.Button(text='2', font=10, command=lambda:Chisla('2')) #  |
+btn_3 = tk.Button(text='3', font=10, command=lambda:Chisla('3')) #  |
+btn_4 = tk.Button(text='4', font=10, command=lambda:Chisla('4')) #  |
+btn_5 = tk.Button(text='5', font=10, command=lambda:Chisla('5')) #  |  Задаём кнопки чисел
+btn_6 = tk.Button(text='6', font=10, command=lambda:Chisla('6')) #  |
+btn_7 = tk.Button(text='7', font=10, command=lambda:Chisla('7')) #  |
+btn_8 = tk.Button(text='8', font=10, command=lambda:Chisla('8')) #  |
+btn_9 = tk.Button(text='9', font=10, command=lambda:Chisla('9')) #  |
+btn_c = tk.Button(text='C', font=10, command=c) #Кнопка отчистки
+btn_del = tk.Button(text='DELETE', font=10, command=dele) #Кнопка delete
+btn_mn = tk.Button(text='*', font=10, command=lambda:do('*')) #Кнопка умножения
+btn_plus = tk.Button(text='+', font=10, command=lambda:do('+')) #Кнопка сложения
+btn_min = tk.Button(text='-', font=10, command=lambda:do('-')) #Кнопка вычитания
+btn_n = tk.Button(text=',', font=10, command=lambda:Chisla('.')) #Кнопка дес.точки
+btn_0 = tk.Button(text='0', font=10, command=lambda:Chisla('0')) #Кнопка 0
+btn_proc = tk.Button(text='%', font=10, command=lambda:do('%')) #Кнопка процентов
+btn_square = tk.Button(text='x^2', font=10, command=square) #Кнопка квадрата
+btn_dlet = tk.Button(text='/', font=10, command=lambda:do('/')) #Кнопка деления
+btn_ravno = tk.Button(text='=', font=10, command=ravno) #Кнопка равно
+btn_dob = tk.Button(text='\/', font=10, command=dob) #Доп.нопка
+btn_sc_1 = tk.Button(text='(', font=10, command=lambda:Chisla('(')) #Кнопка открывающая скобку
+btn_sc_2 = tk.Button(text=')', font=10, command=lambda:Chisla(')')) #Кнопка закрывающая скобку
+btn_step = tk.Button(text='x^n', font=10, command=lambda:do('^')) #Кнопка степень
+btn_kor = tk.Button(text='√', font=10, command=cor) #Кнопка корня
+
+#Задаём местополложение кнопок
+btn_c.grid(row=1, column=0, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_del.grid(row=1, column=1, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_mn.grid(row=1, column=2, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_ravno.grid(row=1, column=3, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_1.grid(row=2, column=0, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_2.grid(row=2, column=1, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_3.grid(row=2, column=2, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_dlet.grid(row=2, column=3, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_4.grid(row=3, column=0, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_5.grid(row=3, column=1, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_6.grid(row=3, column=2, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_plus.grid(row=3, column=3, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_7.grid(row=4, column=0, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_8.grid(row=4, column=1, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_9.grid(row=4, column=2, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_min.grid(row=4, column=3, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_n.grid(row=5, column=0, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_0.grid(row=5, column=1, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_proc.grid(row=5, column=2, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_square.grid(row=5, column=3, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+btn_dob.grid(row=1, column=4, ipadx=6, ipady=6, padx=4, pady=4, sticky='nsew')
+
+root.mainloop()
