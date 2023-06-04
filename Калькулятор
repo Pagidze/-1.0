@@ -240,7 +240,7 @@ for i in range(6): root.rowconfigure(index=i, weight=1)
 
 #Задаёт экран
 text = tk.Label(text='0', font=40, bg='black', fg='white', justify='right')
-text.grid(row=0, column=0, columnspan=4, ipadx=480, ipady=50)
+text.grid(row=0, column=0, columnspan=5, ipadx=480, ipady=50)
 
 btn_1 = tk.Button(text='1', font=10, command=lambda:Chisla('1')) #  |
 btn_2 = tk.Button(text='2', font=10, command=lambda:Chisla('2')) #  |
